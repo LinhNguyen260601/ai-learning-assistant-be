@@ -6,7 +6,7 @@ import {
   errorHandler,
   notFoundHandler,
 } from "./src/middleware/errorHandler.middleware";
-import { ENVIROMENTS } from "./src/constants";
+import { ENVIRONMENTS } from "./src/constants";
 import { connectDB } from "./src/config";
 import router from "./src/routes";
 
@@ -46,8 +46,8 @@ app.use(errorHandler);
 app.use(notFoundHandler);
 
 // Start the server
-app.listen(ENVIROMENTS.PORT, () => {
-  console.log(`Server is running on port ${ENVIROMENTS.PORT}`);
+app.listen(ENVIRONMENTS.PORT, () => {
+  console.log(`Server is running on port ${ENVIRONMENTS.PORT}`);
 });
 
 process.on("unhandledRejection", (error: Error) => {
