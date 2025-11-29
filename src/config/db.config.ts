@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
-import { ENVIROMENTS } from "../constants";
+import { ENVIRONMENTS } from "../constants";
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(ENVIROMENTS.MONGO_URI!);
+    const conn = await mongoose.connect(ENVIRONMENTS.MONGO_URI!);
     console.log(`MongoDB connected: ${conn.connection.host}`);
   } catch (error) {
     error instanceof Error
