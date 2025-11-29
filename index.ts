@@ -2,10 +2,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import express from "express";
 import cors from "cors";
-import {
-  errorHandler,
-  notFoundHandler,
-} from "./src/middleware/errorHandler.middleware";
+import { errorHandler, notFoundHandler } from "./src/middleware";
 import { ENVIRONMENTS } from "./src/constants";
 import { connectDB } from "./src/config";
 import router from "./src/routes";
