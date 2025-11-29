@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import { ENVIROMENTS, STATUS_CODES } from "../constants";
+import { ENVIRONMENTS, STATUS_CODES } from "../constants";
 import type { AppError } from "../types";
 
 export const errorHandler = (
@@ -52,14 +52,14 @@ export const errorHandler = (
 
   console.error("Error", {
     message: err.message,
-    stack: ENVIROMENTS.NODE_ENV === "development" ? err.stack : undefined,
+    stack: ENVIRONMENTS.NODE_ENV === "development" ? err.stack : undefined,
   });
 
   res.status(statusCode).json({
     success: false,
     status: statusCode,
     message,
-    ...(ENVIROMENTS.NODE_ENV === "development" && { stack: err.stack }),
+    ...(ENVIRONMENTS.NODE_ENV === "development" && { stack: err.stack }),
   });
 };
 
