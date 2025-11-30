@@ -43,25 +43,25 @@ const documentSchema = new Schema(
           type: Number,
           required: [true, "Chunk index is required"],
         },
-        uploadDate: {
-          type: Date,
-          default: Date.now,
-        },
-        lastAccessed: {
-          type: Date,
-          default: Date.now,
-        },
-        status: {
-          type: String,
-          enum: [
-            DocumentStatus.PROCESSING,
-            DocumentStatus.READY,
-            DocumentStatus.FAILED,
-          ],
-          default: DocumentStatus.PROCESSING,
-        },
       },
     ],
+    uploadDate: {
+      type: Date,
+      default: Date.now,
+    },
+    lastAccessed: {
+      type: Date,
+      default: Date.now,
+    },
+    status: {
+      type: String,
+      enum: [
+        DocumentStatus.PROCESSING,
+        DocumentStatus.READY,
+        DocumentStatus.FAILED,
+      ],
+      default: DocumentStatus.PROCESSING,
+    },
   },
   {
     timestamps: true,

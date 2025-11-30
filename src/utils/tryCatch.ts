@@ -5,6 +5,7 @@ import type { Request, Response, NextFunction } from "express";
  * and pass them to the error handling middleware
  *
  * @param fn - The async controller function to wrap
+ * @param cachCb - A callback function to clean up resources on error
  * @returns A new function that handles errors automatically
  *
  * @example
@@ -15,7 +16,13 @@ import type { Request, Response, NextFunction } from "express";
  * }));
  *  */
 export const tryCatch =
-  (fn: (req: Request, res: Response, next: NextFunction) => Promise<void>) =>
+  (
+    fn: (req: Request, res: Response, next: NextFunction) => Promise<void>,
+    cachCb?: (req: Request, res: Response, next: NextFunction) => void
+  ) =>
   (req: Request, res: Response, next: NextFunction): void => {
-    Promise.resolve(fn(req, res, next)).catch(next);
+    Promise.resolve(fn(req, res, next)).catch((error: Error) => {
+      if (cachCb) cachCb(req, res, next);
+      next(new Error(error.message));
+    });
   };
