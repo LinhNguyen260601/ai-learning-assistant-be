@@ -13,7 +13,10 @@ class AuthController {
     res.status(response.statusCode).json(response);
   });
 
-  async getMe(req: Request, res: Response) {}
+  public getMe = tryCatch(async (req: Request, res: Response) => {
+    const response = await authService.getMe(req.user?._id as string);
+    res.status(response.statusCode).json(response);
+  });
 
   async updateMe(req: Request, res: Response) {}
 

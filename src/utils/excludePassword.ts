@@ -7,7 +7,7 @@ import type { UserDocument } from "../types";
  * @returns The user document without the password
  */
 export const excludePassword = (
-  user: Document
+  user: UserDocument
 ): Omit<UserDocument, "password"> => {
   const { password, ...userWithoutPassword } = user.toObject();
   return userWithoutPassword;

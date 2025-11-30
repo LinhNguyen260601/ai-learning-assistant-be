@@ -1,6 +1,6 @@
 import { STATUS_CODES } from "../constants";
 import { userRepository } from "../repositories";
-import type { Response, UserEntity } from "../types";
+import type { Response, UserDocument, UserEntity } from "../types";
 import { excludePassword } from "../utils/excludePassword";
 import { generateToken } from "../utils/token";
 
@@ -84,6 +84,32 @@ class AuthService {
           user: excludePassword(user),
           token,
         },
+      };
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  public getMe = async (
+    userId: string
+  ): Promise<Response<{ user: Omit<UserEntity, "password"> }>> => {
+    try {
+      const user = await userRepository.findUser({ _id: userId });
+      console.log("user", user);
+
+      if (!user) {
+        return {
+          success: false,
+          message: "User not found",
+          statusCode: STATUS_CODES.NOT_FOUND,
+        };
+      }
+
+      return {
+        success: true,
+        statusCode: STATUS_CODES.OK,
+        message: "User found",
+        data: { user: excludePassword(user as UserDocument) },
       };
     } catch (error) {
       throw error;

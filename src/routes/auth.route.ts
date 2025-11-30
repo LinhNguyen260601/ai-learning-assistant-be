@@ -10,12 +10,9 @@ authRouter.post("/register", registerValidation, authController.register);
 authRouter.post("/login", loginValidation, authController.login);
 
 // Protected routes
-authRouter.get("/me", protectedRoute, authController.getMe);
-authRouter.patch("/me", protectedRoute, authController.updateMe);
-authRouter.post(
-  "/change-password",
-  protectedRoute,
-  authController.changePassword
-);
+authRouter.use(protectedRoute);
+authRouter.get("/me", authController.getMe);
+authRouter.patch("/me", authController.updateMe);
+authRouter.post("/change-password", authController.changePassword);
 
 export default authRouter;
