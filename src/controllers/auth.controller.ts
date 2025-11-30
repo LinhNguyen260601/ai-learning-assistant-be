@@ -1,7 +1,6 @@
 import type { Request, Response } from "express";
-import { STATUS_CODES } from "../constants/status.constant";
-import { tryCatch } from "../utils";
 import { authService } from "../services";
+import { tryCatch } from "../utils";
 
 class AuthController {
   public register = tryCatch(async (req: Request, res: Response) => {
@@ -9,7 +8,10 @@ class AuthController {
     res.status(response.statusCode).json(response);
   });
 
-  async login(req: Request, res: Response) {}
+  public login = tryCatch(async (req: Request, res: Response) => {
+    const response = await authService.login(req.body);
+    res.status(response.statusCode).json(response);
+  });
 
   async getMe(req: Request, res: Response) {}
 
