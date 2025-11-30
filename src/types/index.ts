@@ -4,3 +4,5 @@ export * from "./document.type";
 export * from "./statusCode.type";
 export * from "./user.type";
 export * from "./response.type";
+export * from "./flashcard.type";
+export * from "./quiz.type";

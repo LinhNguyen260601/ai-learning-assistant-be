@@ -10,4 +10,6 @@ export const ENVIRONMENTS = {
 
   JWT_SECRET: process.env.JWT_SECRET,
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || "7d",
+
+  MAX_FILE_SIZE: parseInt(process.env.MAX_FILE_SIZE!) || 10485760,
 } as const;
