@@ -8,5 +8,5 @@ export type UserEntity = Omit<
 
 export type UserDocument = Document &
   UserEntity & {
-    matchPassword: (password: string) => Promise<boolean>;
+    matchPassword?: (password: string) => Promise<boolean>;
   };

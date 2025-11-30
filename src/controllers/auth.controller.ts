@@ -18,7 +18,13 @@ class AuthController {
     res.status(response.statusCode).json(response);
   });
 
-  async updateMe(req: Request, res: Response) {}
+  public updateMe = tryCatch(async (req: Request, res: Response) => {
+    const response = await authService.updateMe(
+      req.body,
+      req.user?._id as string
+    );
+    res.status(response.statusCode).json(response);
+  });
 
   async changePassword(req: Request, res: Response) {}
 }

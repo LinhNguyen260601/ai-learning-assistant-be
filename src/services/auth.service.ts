@@ -65,7 +65,7 @@ class AuthService {
         };
       }
 
-      const isMatch = await user.matchPassword(payload.password);
+      const isMatch = await user.matchPassword?.(payload.password);
 
       if (!isMatch)
         return {
@@ -95,7 +95,6 @@ class AuthService {
   ): Promise<Response<{ user: Omit<UserEntity, "password"> }>> => {
     try {
       const user = await userRepository.findUser({ _id: userId });
-      console.log("user", user);
 
       if (!user) {
         return {
@@ -110,6 +109,41 @@ class AuthService {
         statusCode: STATUS_CODES.OK,
         message: "User found",
         data: { user: excludePassword(user as UserDocument) },
+      };
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  public updateMe = async (
+    payload: Partial<UserEntity>,
+    userId: string
+  ): Promise<Response<{ user: Omit<UserEntity, "password"> }>> => {
+    try {
+      const { username, email, profileImage } = payload;
+      const user = await userRepository.findUser({ _id: userId });
+      if (!user) {
+        return {
+          success: false,
+          message: "User not found",
+          statusCode: STATUS_CODES.NOT_FOUND,
+        };
+      }
+
+      const updatedUser = await userRepository.updateUser(
+        userId,
+        Object.assign(user, {
+          ...(username && { username }),
+          ...(email && { email }),
+          ...(profileImage && { profileImage }),
+        })
+      );
+
+      return {
+        success: true,
+        statusCode: STATUS_CODES.OK,
+        message: "User updated successfully",
+        data: { user: updatedUser },
       };
     } catch (error) {
       throw error;

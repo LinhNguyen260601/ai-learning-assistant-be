@@ -18,6 +18,14 @@ class UserRepository {
     const user = await User.create(payload);
     return excludePassword(user);
   };
+
+  public updateUser = async (userId: string, payload: Partial<UserEntity>) => {
+    const user = await User.findByIdAndUpdate(userId, payload, {
+      new: true,
+      runValidators: true,
+    });
+    return excludePassword(user as UserDocument);
+  };
 }
 
 export default new UserRepository();
