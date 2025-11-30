@@ -45,13 +45,13 @@ export const protectedRoute = async (
           message: "Token expired",
         });
       }
-    }
 
-    return res.status(STATUS_CODES.UNAUTHORIZED).json({
-      success: false,
-      statusCode: STATUS_CODES.UNAUTHORIZED,
-      message: "Not authorized, token failed",
-    });
+      return res.status(STATUS_CODES.UNAUTHORIZED).json({
+        success: false,
+        statusCode: STATUS_CODES.UNAUTHORIZED,
+        message: "Not authorized, token failed",
+      });
+    }
   }
 
   if (!token) {
