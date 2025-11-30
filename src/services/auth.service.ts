@@ -149,6 +149,52 @@ class AuthService {
       throw error;
     }
   };
+
+  public changePassword = async (
+    payload: { currentPassword: string; newPassword: string },
+    userId: string
+  ): Promise<Response<{ user: Omit<UserEntity, "password"> }>> => {
+    try {
+      const { currentPassword, newPassword } = payload;
+
+      if (!currentPassword || !newPassword) {
+        return {
+          success: false,
+          message: "Current password and new password are required",
+          statusCode: STATUS_CODES.BAD_REQUEST,
+        };
+      }
+
+      const user = await userRepository.findUserWithPassword({ _id: userId });
+      if (!user) {
+        return {
+          success: false,
+          message: "User not found",
+          statusCode: STATUS_CODES.NOT_FOUND,
+        };
+      }
+
+      const isMatch = await user.matchPassword?.(currentPassword);
+      if (!isMatch) {
+        return {
+          success: false,
+          message: "Invalid current password",
+          statusCode: STATUS_CODES.UNAUTHORIZED,
+        };
+      }
+
+      user.password = newPassword;
+      await user.save();
+
+      return {
+        success: true,
+        statusCode: STATUS_CODES.OK,
+        message: "Password changed successfully",
+      };
+    } catch (error) {
+      throw error;
+    }
+  };
 }
 
 export default new AuthService();
