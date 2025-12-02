@@ -1,6 +1,11 @@
 import mongoose from "mongoose";
 import { Flashcard } from "../models";
-import type { FlashcardEntity, Response } from "../types";
+import type {
+  FlashcardEntity,
+  Response,
+  Difficulty,
+  CreateFlashcardDTO,
+} from "../types";
 import { STATUS_CODES } from "../constants";
 
 class FlashcardRepository {
@@ -32,41 +37,12 @@ class FlashcardRepository {
     cardId: string,
     userId: string
   ): Promise<Response<FlashcardEntity>> => {
-    const updatedFlashCardSet = await Flashcard.findOneAndUpdate(
-      {
-        userId: new mongoose.Types.ObjectId(userId),
-        "cards._id": new mongoose.Types.ObjectId(cardId),
-      },
-      [
-        {
-          $set: {
-            cards: {
-              $map: {
-                input: "$cards",
-                as: "card",
-                in: {
-                  $cond: {
-                    if: {
-                      $eq: ["$$card._id", new mongoose.Types.ObjectId(cardId)],
-                    },
-                    then: {
-                      $mergeObjects: [
-                        "$$card",
-                        { isStarred: { $not: "$$card.isStarred" } },
-                      ],
-                    },
-                    else: "$$card",
-                  },
-                },
-              },
-            },
-          },
-        },
-      ],
-      { new: true }
-    ).lean();
+    const flashcardSet = await Flashcard.findOne({
+      userId: new mongoose.Types.ObjectId(userId),
+      "cards._id": new mongoose.Types.ObjectId(cardId),
+    });
 
-    if (!updatedFlashCardSet) {
+    if (!flashcardSet) {
       return {
         success: false,
         statusCode: STATUS_CODES.NOT_FOUND,
@@ -74,8 +50,8 @@ class FlashcardRepository {
       };
     }
 
-    const card = updatedFlashCardSet.cards.find(
-      (card) => card._id.toString() === cardId.toString()
+    const card = flashcardSet.cards.find(
+      (c) => c._id.toString() === cardId.toString()
     );
 
     if (!card) {
@@ -86,11 +62,14 @@ class FlashcardRepository {
       };
     }
 
+    card.isStarred = !card.isStarred;
+    const updatedFlashCardSet = await flashcardSet.save();
+
     return {
       success: true,
       statusCode: STATUS_CODES.OK,
       message: `Flashcard ${card.isStarred ? "starred" : "unstarred"}`,
-      data: updatedFlashCardSet,
+      data: updatedFlashCardSet.toObject() as FlashcardEntity,
     };
   };
 
@@ -164,6 +143,13 @@ class FlashcardRepository {
   ): Promise<number> => {
     const flashcardCount = await Flashcard.countDocuments(query);
     return flashcardCount;
+  };
+
+  public createFlashcardSet = async (
+    payload: CreateFlashcardDTO
+  ): Promise<FlashcardEntity> => {
+    const flashcardSet = await Flashcard.create(payload);
+    return flashcardSet.toObject() as FlashcardEntity;
   };
 }
 
