@@ -12,4 +12,6 @@ export const ENVIRONMENTS = {
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || "7d",
 
   MAX_FILE_SIZE: parseInt(process.env.MAX_FILE_SIZE!) || 10485760,
+
+  GEMINI_API_KEY: process.env.GEMINI_API_KEY,
 } as const;

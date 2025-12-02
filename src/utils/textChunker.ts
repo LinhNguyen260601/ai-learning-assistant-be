@@ -1,3 +1,5 @@
+import type { Types } from "mongoose";
+
 /**
  * Chunks text into smaller chunks while preserving paragraph structure
  * @param text - The text to chunk
@@ -137,7 +139,7 @@ export const findRelevantChunks = (
     content: string;
     chunkIndex: number;
     pageNumber: number;
-    _id: string;
+    _id: string | Types.ObjectId;
   }[],
   query: string,
   maxChunks = 3
@@ -188,7 +190,7 @@ export const findRelevantChunks = (
       content: chunk.content,
       chunkIndex: chunk.chunkIndex,
       pageNumber: chunk.pageNumber,
-      _id: chunk._id,
+      _id: chunk._id.toString(),
     }));
   }
 
@@ -228,7 +230,7 @@ export const findRelevantChunks = (
       content: chunk.content,
       chunkIndex: chunk.chunkIndex,
       pageNumber: chunk.pageNumber,
-      _id: chunk._id,
+      _id: chunk._id.toString(),
       score: normalizedScore * positionBonus,
       rawScore: score,
       matchedWords: uniqueWordsFound,
