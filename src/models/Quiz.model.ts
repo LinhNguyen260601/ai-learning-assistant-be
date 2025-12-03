@@ -13,6 +13,11 @@ const quizSchema = new Schema(
       required: [true, "Document ID is required"],
       trim: true,
     },
+    title: {
+      type: String,
+      required: [true, "Title is required"],
+      trim: true,
+    },
     questions: [
       {
         question: {
