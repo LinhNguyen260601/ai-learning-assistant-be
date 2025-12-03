@@ -73,6 +73,13 @@ class DocumentRepository {
     );
     return document;
   };
+
+  public getTotalDocuments = async (userId: string): Promise<number> => {
+    const totalDocuments = await DocumentModel.countDocuments({
+      userId: new mongoose.Types.ObjectId(userId),
+    });
+    return totalDocuments;
+  };
 }
 
 export default new DocumentRepository();
