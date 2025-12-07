@@ -16,9 +16,14 @@ class DocumentRepository {
         $match: { userId: new mongoose.Types.ObjectId(userId) },
       },
       {
+        $addFields: {
+          documentIdString: { $toString: "$_id" },
+        },
+      },
+      {
         $lookup: {
           from: "flashcards",
-          localField: "_id",
+          localField: "documentIdString",
           foreignField: "documentId",
           as: "flashcardSets",
         },
@@ -26,7 +31,7 @@ class DocumentRepository {
       {
         $lookup: {
           from: "quizzes",
-          localField: "_id",
+          localField: "documentIdString",
           foreignField: "documentId",
           as: "quizzes",
         },
@@ -43,6 +48,7 @@ class DocumentRepository {
           chunks: 0,
           flashcardSets: 0,
           quizzes: 0,
+          documentIdString: 0,
         },
       },
       {
