@@ -81,7 +81,7 @@ class AiService {
     userId: string
   ): Promise<Response<QuizEntity>> => {
     try {
-      const { documentId, numQuestions = 5, title = "" } = payload;
+      const { documentId, numQuestions = 5, title } = payload;
       if (!documentId)
         return {
           success: false,
@@ -109,7 +109,7 @@ class AiService {
       const quiz = await quizRepository.createQuiz({
         userId: new mongoose.Types.ObjectId(userId),
         documentId: document._id.toString(),
-        title: title || `${document.title} - Quiz`,
+        title: title?.trim() || `${document.title} - Quiz`,
         questions: questions ?? [],
         totalQuestions: (questions ?? []).length,
         userAnswers: [],
