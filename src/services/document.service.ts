@@ -1,4 +1,7 @@
 import { unlink } from "fs/promises";
+import { join } from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 import { ENVIRONMENTS, STATUS_CODES } from "../constants";
 import {
   documentRepository,
@@ -8,6 +11,9 @@ import {
 import { DocumentStatus, type DocumentEntity, type Response } from "../types";
 import { chunkText, extractTextFromPdf } from "../utils";
 import mongoose from "mongoose";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 class DocumentService {
   public uploadDocument = async (
@@ -178,8 +184,17 @@ class DocumentService {
           message: "Document not found",
         };
 
+      // Extract filename from URL and construct actual file path
+      const urlPath = document.filePath;
+      const filename = urlPath.split("/").pop() || "";
+      const actualFilePath = join(
+        __dirname,
+        "../../uploads/documents",
+        filename
+      );
+
       // Delete file from file system
-      await unlink(document.filePath).catch(() => {});
+      await unlink(actualFilePath).catch(() => {});
 
       // Delete document from database
       await document.deleteOne();
