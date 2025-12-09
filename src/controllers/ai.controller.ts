@@ -85,10 +85,12 @@ class AiController {
     next: NextFunction
   ): Promise<void> => {
     try {
-      res.status(501).json({
-        success: false,
-        message: "getChatHistory is not implemented yet",
-      });
+      const { documentId } = req.params;
+      const response = await aiService.getChatHistory(
+        documentId,
+        req.user?._id as string
+      );
+      res.status(response.statusCode).json(response);
     } catch (error) {
       next(error);
     }
