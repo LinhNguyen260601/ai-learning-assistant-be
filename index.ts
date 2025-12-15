@@ -18,11 +18,18 @@ const app = express();
 connectDB();
 
 // CORS middleware
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://ai-learning-assistant-be.onrender.com",
+];
+
 app.use(
   cors({
-    origin: "*",
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    origin: (origin, cb) => {
+      if (!origin) return cb(null, true);
+      if (allowedOrigins.includes(origin)) return cb(null, true);
+      cb(new Error("CORS blocked"));
+    },
     credentials: true,
   })
 );
