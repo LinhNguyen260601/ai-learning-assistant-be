@@ -1,5 +1,4 @@
 import { unlink } from "fs/promises";
-import { join } from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import { ENVIRONMENTS, STATUS_CODES } from "../constants";
@@ -11,6 +10,7 @@ import {
 import { DocumentStatus, type DocumentEntity, type Response } from "../types";
 import { chunkText, extractTextFromPdf } from "../utils";
 import mongoose from "mongoose";
+import { cloudinary } from "../config";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -32,8 +32,6 @@ class DocumentService {
       const { title } = payload;
 
       if (!title) {
-        // Delete uploaded file if not title provided
-        await unlink(file.path);
         return {
           success: false,
           statusCode: STATUS_CODES.BAD_REQUEST,
@@ -41,24 +39,55 @@ class DocumentService {
         };
       }
 
-      // Construct the URL for the uploaded file
-      const baseUrl = `http://localhost:${ENVIRONMENTS.PORT}`;
-      const fileUrl = `${baseUrl}/uploads/documents/${file.filename}`;
+      // Upload file buffer to Cloudinary
+      const uploadResult = await new Promise<{
+        secure_url: string;
+        public_id: string;
+        bytes: number;
+      }>((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            resource_type: "raw",
+            folder: "ai-learning-assistant",
+            format: "pdf",
+            use_filename: true,
+            unique_filename: true,
+          },
+          (error, result) => {
+            if (error || !result) {
+              reject(error || new Error("Cloudinary upload failed"));
+              return;
+            }
+
+            resolve({
+              secure_url: result.secure_url,
+              public_id: result.public_id,
+              bytes: result.bytes,
+            });
+          }
+        );
+
+        uploadStream.end(file.buffer);
+      });
 
       // Create document record
       const document = await documentRepository.createDocument({
         userId: new mongoose.Types.ObjectId(userId),
         title,
         fileName: file.originalname,
-        filePath: fileUrl,
-        fileSize: file.size,
+        filePath: uploadResult.secure_url,
+        fileSize: uploadResult.bytes,
+        // @ts-expect-error - allow extra field without changing type right now
+        cloudinaryPublicId: uploadResult.public_id,
         status: DocumentStatus.PROCESSING,
       });
 
       // Process PDF in background (in production, use a queue like Bull)
-      this.processPDF(document._id.toString(), file.path).catch((error) => {
-        console.error("PDF processing failed", error);
-      });
+      this.processPDF(document._id.toString(), file.buffer).catch(
+        (error: unknown) => {
+          console.error("PDF processing failed", error);
+        }
+      );
 
       return {
         success: true,
@@ -73,10 +102,10 @@ class DocumentService {
 
   private processPDF = async (
     documentId: string,
-    filePath: string
+    fileBuffer: Buffer
   ): Promise<void> => {
     try {
-      const { text } = await extractTextFromPdf(filePath);
+      const { text } = await extractTextFromPdf(fileBuffer);
 
       // Create chunks
       const chunks = chunkText(text, 500, 50);
@@ -184,17 +213,27 @@ class DocumentService {
           message: "Document not found",
         };
 
-      // Extract filename from URL and construct actual file path
-      const urlPath = document.filePath;
-      const filename = urlPath.split("/").pop() || "";
-      const actualFilePath = join(
-        __dirname,
-        "../../uploads/documents",
-        filename
-      );
+      // Delete file from Cloudinary if publicId is stored
+      const publicId = (document as any).cloudinaryPublicId as
+        | string
+        | undefined;
+      if (publicId) {
+        await cloudinary.uploader
+          .destroy(publicId, { resource_type: "raw" })
+          .catch(() => {});
+      }
 
-      // Delete file from file system
-      await unlink(actualFilePath).catch(() => {});
+      // Delete related flashcards and quizzes
+      await Promise.all([
+        flashcardRepository.deleteByDocumentId(
+          userIdObjectId.toString(),
+          document._id.toString()
+        ),
+        quizRepository.deleteByDocumentId(
+          userIdObjectId.toString(),
+          document._id.toString()
+        ),
+      ]);
 
       // Delete document from database
       await document.deleteOne();

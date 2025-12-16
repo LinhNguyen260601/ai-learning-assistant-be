@@ -1,18 +1,16 @@
-import { readFile } from "fs/promises";
 import { PDFParse } from "pdf-parse";
 
 /**
  * Extracts text and metadata from a PDF file
- * @param filePath - The path to the PDF file
+ * @param file - The PDF file as a Buffer
  * @returns An object containing the text, number of pages, and metadata
  */
 export const extractTextFromPdf = async (
-  filePath: string
+  file: Buffer
 ): Promise<{ text: string; numPages: number; info: any }> => {
   let parser: PDFParse | null = null;
   try {
-    const dataBuffer = await readFile(filePath);
-    parser = new PDFParse({ data: dataBuffer });
+    parser = new PDFParse({ data: file });
 
     const textResult = await parser.getText();
     const infoResult = await parser.getInfo();

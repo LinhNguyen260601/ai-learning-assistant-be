@@ -2,27 +2,25 @@ import type { Request } from "express";
 import multer, { type FileFilterCallback } from "multer";
 import { ENVIRONMENTS } from "../constants";
 
-// File filter -only PDFS
-const fileFilter = (
+const imageFileFilter = (
   _req: Request,
   file: Express.Multer.File,
   cb: FileFilterCallback
 ) => {
-  if (file.mimetype === "application/pdf") {
+  if (file.mimetype.startsWith("image/")) {
     cb(null, true);
     return;
   }
 
-  cb(new Error("Only PDF files are allowed") as unknown as null, false);
+  cb(new Error("Only image files are allowed") as unknown as null, false);
 };
 
-// Configure multer - use memory storage, file will be uploaded to Cloudinary
-const upload = multer({
+const uploadProfileImage = multer({
   storage: multer.memoryStorage(),
-  fileFilter,
+  fileFilter: imageFileFilter,
   limits: {
     fileSize: ENVIRONMENTS.MAX_FILE_SIZE,
   },
 });
 
-export default upload;
+export default uploadProfileImage;

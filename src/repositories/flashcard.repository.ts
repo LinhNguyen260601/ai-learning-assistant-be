@@ -152,6 +152,16 @@ class FlashcardRepository {
     return flashcardSet.toObject() as FlashcardEntity;
   };
 
+  public deleteByDocumentId = async (
+    userId: string,
+    documentId: string
+  ): Promise<void> => {
+    await Flashcard.deleteMany({
+      userId: new mongoose.Types.ObjectId(userId),
+      documentId,
+    });
+  };
+
   public getTotalFlashcardSets = async (userId: string): Promise<number> => {
     const totalFlashcardSets = await Flashcard.countDocuments({
       userId: new mongoose.Types.ObjectId(userId),

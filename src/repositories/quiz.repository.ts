@@ -31,6 +31,16 @@ class QuizRepository {
       .lean();
     return quizzes as QuizEntity[];
   };
+
+  public deleteByDocumentId = async (
+    userId: string,
+    documentId: string
+  ): Promise<void> => {
+    await Quiz.deleteMany({
+      userId: new mongoose.Types.ObjectId(userId),
+      documentId,
+    });
+  };
 }
 
 export default new QuizRepository();

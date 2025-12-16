@@ -21,7 +21,8 @@ class AuthController {
   public updateMe = tryCatch(async (req: Request, res: Response) => {
     const response = await authService.updateMe(
       req.body,
-      req.user?._id as string
+      req.user?._id as string,
+      req.file as Express.Multer.File | undefined
     );
     res.status(response.statusCode).json(response);
   });

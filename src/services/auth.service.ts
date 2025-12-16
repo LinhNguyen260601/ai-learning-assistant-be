@@ -3,6 +3,7 @@ import { userRepository } from "../repositories";
 import type { Response, UserDocument, UserEntity } from "../types";
 import { excludePassword } from "../utils/excludePassword";
 import { generateToken } from "../utils/token";
+import { cloudinary } from "../config";
 
 class AuthService {
   public register = async (
@@ -117,7 +118,8 @@ class AuthService {
 
   public updateMe = async (
     payload: Partial<UserEntity>,
-    userId: string
+    userId: string,
+    file?: Express.Multer.File
   ): Promise<Response<{ user: Omit<UserEntity, "password"> }>> => {
     try {
       const { username, email, profileImage } = payload;
@@ -130,12 +132,42 @@ class AuthService {
         };
       }
 
+      let uploadedProfileImageUrl = profileImage;
+
+      if (file) {
+        const uploadResult = await new Promise<{ secure_url: string }>(
+          (resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+              {
+                folder: "ai-learning-assistant",
+                use_filename: true,
+                unique_filename: true,
+              },
+              (error, result) => {
+                if (error || !result) {
+                  reject(error || new Error("Cloudinary upload failed"));
+                  return;
+                }
+
+                resolve({ secure_url: result.secure_url });
+              }
+            );
+
+            uploadStream.end(file.buffer);
+          }
+        );
+
+        uploadedProfileImageUrl = uploadResult.secure_url;
+      }
+
       const updatedUser = await userRepository.updateUser(
         userId,
         Object.assign(user, {
           ...(username && { username }),
           ...(email && { email }),
-          ...(profileImage && { profileImage }),
+          ...(uploadedProfileImageUrl && {
+            profileImage: uploadedProfileImageUrl,
+          }),
         })
       );
 
