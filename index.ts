@@ -22,7 +22,7 @@ const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:5173",
   "https://ai-learning-assistant-be.onrender.com",
-  "https://ai-learning-assistant-git-99fcb0-linh-nguyens-projects-dc2d9f17.vercel.app",
+  "https://ai-learning-assistant-fe.vercel.app",
 ];
 
 app.use(
